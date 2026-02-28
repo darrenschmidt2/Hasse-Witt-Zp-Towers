@@ -395,10 +395,37 @@ computeH1dR := function(p, r, n, f)
     g := Integers()!g;
     H1, H0, H1Dict, H0Dict, funcExp, diffExp := computeH1(p, dList, n, varList, lift);
 
+    //dRBasis := H1 cat H0;
+    
     print("Bases computed");
 
-    pairing := [];
+    pairing := ZeroMatrix(k,2*g);
+    for i in [1 .. g] do
+        for j in [Max(i+1,g+1) .. 2*g] do
 
+            firstVal := 0;
+            if i le g and j gt g then
+                if funcExp[i][1] + diffExp[((j-1) mod g) + 1][1] eq -1 then
+                    firstVal := (-1)^(n+1);
+                    for k in [2 .. n+1] do
+                        yFunc := funcExp[i][k];
+                        yDiff := diffExp[((j-1) mod g) + 1][k];
+                        
+                        if yFunc + yDiff ne p-1 and yFunc + yDiff ne 2*p-2 then
+                            firstVal := 0;
+                        end if;
+                    end for;
+                end if;
+    
+            end if;
+
+            pairing[i][j] := firstVal;
+            pairing[j][i] := -1*firstVal;
+        end for;
+    end for; 
+
+    
+    /*
     for i in [1 .. g] do
         entry := [(-1)^(n+1) : j in [1 .. g]];
         for j in [1 .. g] do
@@ -418,7 +445,9 @@ computeH1dR := function(p, r, n, f)
 
     funcPairing := Matrix(k,pairing);
     diffPairing := Transpose(funcPairing);
+    */
 
+    
     FHN := [];
     psi := [];
     print("Pairing Computed");
@@ -485,7 +514,9 @@ computeH1dR := function(p, r, n, f)
         Append(~FHN, frobEntry);
         Append(~psi, diffEntry);
     end for;
+    
     print("Frobenius and psi computed on H1 and H0, resp");
+    
     F := Matrix(k, FHN);
     psi := Matrix(k, psi);
     A := KernelMatrix(F);
@@ -521,7 +552,7 @@ computeH1dR := function(p, r, n, f)
     end for;
     dRF := Matrix(k,dRF);
 
-    funcV := [];
+   /* funcV := [];
     diffV := [];
     zeroVec := [k!0 : i in [1 .. g]];
     for i in [1 .. g] do
@@ -546,24 +577,15 @@ computeH1dR := function(p, r, n, f)
         Append(~diffV, zeroVec cat vDiffEntry);
         
         
-    end for;
+    end for; */
+
+    
+    dRV := pairing*Transpose(dRF)*pairing^(-1);
+    
     
     print("V on H1dR Computed");
-    dRV := VerticalJoin(Matrix(k,funcV),Matrix(k,diffV));
+    //dRV := VerticalJoin(Matrix(k,funcV),Matrix(k,diffV));
 
 
-    /*for i in [0 .. 2*p-2] do
-        for j in [0 .. 2*p-2] do
-            c := lift(computeTrace(i,j,varList,p));
-            if c ne 0 then
-                print(i);
-                print(j);
-                print(lift(computeTrace(i,j,varList,p)));
-                print("");
-            end if;
-        end for;
-    end for;*/
-    //print(lift(computeTrace(1,p-1,varList,p)));
-    //return KernelMatrix(Matrix(k,psi));
     return dRF,dRV;
 end function;

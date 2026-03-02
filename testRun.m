@@ -1,8 +1,8 @@
 load "h1dr.m";
 
-K<t> := PolynomialRing(GF(3));
+K<t> := PolynomialRing(GF(2));
 
-F,V := computeH1dR(3,1,3,t^2);
+F,V := computeH1dR(2,1,7,t^3);
 
 
 f := Open("frobeniusMatrix.txt", "w");
